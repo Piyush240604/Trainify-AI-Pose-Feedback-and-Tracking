@@ -32,7 +32,7 @@ export const drawPoseLandmarksAndConnections = (
         ctx.beginPath();
         ctx.moveTo(kp1.x, kp1.y);
         ctx.lineTo(kp2.x, kp2.y);
-        ctx.lineWidth = 3;
+        ctx.lineWidth = 4;
   
         // 🔴 Use red if this pair is in incorrectPairs
         const isIncorrect = incorrectPairs.some(([a, b]) =>
