@@ -2,7 +2,7 @@ import { Keypoint } from "@tensorflow-models/pose-detection";
 import { getAngle } from "../utils/getAngle";
 
 // Main feedback logic for Jumping Jacks exercise
-export const getWorkoutFeedback = (
+export const getJumpingJacksFeedback = (
   keypoints: Keypoint[],
   countRef: React.RefObject<number>,
   setCountRef: React.RefObject<boolean>,
@@ -23,9 +23,16 @@ export const getWorkoutFeedback = (
   const rightHip = keypoints[12];
   const rightAnkle = keypoints[16];
 
+  const leftKnee = keypoints[13];
+  const rightKnee = keypoints[14];
+
   // Calculate arm angles
   const leftElbowAngle = getAngle(leftShoulder, leftElbow, leftWrist);
   const rightElbowAngle = getAngle(rightShoulder, rightElbow, rightWrist);
+
+  // Calculate knee angles
+  const leftKneeAngle = getAngle(leftHip, leftKnee, leftAnkle);
+  const rightKneeAngle = getAngle(rightHip, rightKnee, rightAnkle);
 
   // Calculate shoulder angles
   const leftShoulderAngle = getAngle(leftHip, leftShoulder, leftElbow);
@@ -48,13 +55,13 @@ export const getWorkoutFeedback = (
     feedback = "Extend your Legs, and Bring your Arms Up!";
   }
 
-  if (topStage) {
+  else if (topStage) {
     initialFlagRef.current = false;
     setCountRef.current = false; // Only count when in the "top" stage
     feedback = "Great! Now jump down.";
   }
 
-  if (bottomStage && !topStage) {
+  else if (bottomStage && !topStage) {
     if (!setCountRef.current) {
       countRef.current += 1;
       setCountRef.current = true; // Ensure the count only increases once
@@ -62,19 +69,48 @@ export const getWorkoutFeedback = (
     feedback = "Great! Now jump up.";
   }
 
-  // Posture correction: Identify incorrect joints
-  if (!bottomStage) {
-    // Arms should be raised to a certain degree (typically above 150 degrees in top stage)
-    incorrectPairs.push([5, 7], [6, 8]); // left arm and right arm aren't fully raised
+  // Posture correction: Check for elbow angles
+  if (leftElbowAngle && leftElbowAngle < 145) {
+    feedback = "Keep your elbow straight!";
+    incorrectPairs.push([7, 9]); // Left elbow to left wrist
   }
 
-  if (!topStage && !bottomStage) {
-    incorrectPairs.push([11, 13], [12, 14]); // legs are not sufficiently spread
+  if (rightElbowAngle && rightElbowAngle < 145) {
+    feedback = "Keep your elbow straight!";
+    incorrectPairs.push([8, 10]); // Right elbow to right wrist
+  }
+
+  // Posture correction: Check for knee angles
+  if (leftKneeAngle && leftKneeAngle < 145) {
+    feedback = "Keep your knee straight!";
+    incorrectPairs.push([11, 13]); // Left hip to left knee
+  }
+
+  if (rightKneeAngle && rightKneeAngle < 145) {
+    feedback = "Keep your knee straight!";
+    incorrectPairs.push([12, 14]); // Right hip to right knee
+  }
+
+  // If only arms raised up, push to incorrect pairs
+  if (leftShoulderAngle && leftShoulderAngle && legSpreadRatio && rightShoulderAngle && rightShoulderAngle > 150 && legSpreadRatio < 1) {
+    incorrectPairs.push([5, 7]); // Left shoulder to left elbow
+    incorrectPairs.push([6, 8]); // Right shoulder to right elbow
+    incorrectPairs.push([7, 9]); // Left elbow to left wrist
+    incorrectPairs.push([8, 10]); // Right elbow to right wrist
+    feedback = "NOT A JUMPING JACK. Extend BOTH LEGS and ARMS!"; // Feedback for incorrect posture
+  }
+
+    // If only legs are spread, push to incorrect pairs
+  if (legSpreadRatio && legSpreadRatio > 1.5 && leftShoulderAngle && leftShoulderAngle < 60 && rightShoulderAngle && rightShoulderAngle < 60) {
+    incorrectPairs.push([11, 13]); // Left hip to left ankle
+    incorrectPairs.push([12, 14]); // Right hip to right ankle
+    incorrectPairs.push([13, 15]); // Left knee to left ankle
+    incorrectPairs.push([14, 16]); // Right knee to right ankle
+    feedback = "NOT A JUMPING JACK. Extend BOTH ARMS and LEGS!"; // Feedback for incorrect posture
   }
 
   return {
     feedback,
-    count: countRef.current,
     incorrectPairs, // Return the list of incorrect body parts for drawing feedback
   };
 };

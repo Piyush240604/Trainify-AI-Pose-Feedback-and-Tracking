@@ -1,6 +1,7 @@
 // App.tsx
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import ExerciseTracking from "./pages/ExerciseTracking";
+import Auth from "./pages/AuthPage";
 
 const App = () => {
 
@@ -10,7 +11,13 @@ const App = () => {
         <Route
           path="/"
           element={
-            <ExerciseTracking />
+            <Auth />
+          }
+        />
+        <Route
+          path="/auth-page"
+          element={
+            <Auth />
           }
         />
         <Route
