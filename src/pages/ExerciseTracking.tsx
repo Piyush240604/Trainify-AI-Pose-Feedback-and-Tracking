@@ -3,11 +3,11 @@ import "@tensorflow/tfjs-backend-webgl";
 import * as tf from "@tensorflow/tfjs-core";
 import * as posedetection from "@tensorflow-models/pose-detection";
 import "../App.css";
-import { getWorkoutFeedback } from "../feedback/getWorkoutFeedback";
+import { getWorkoutFeedback } from "../feedback";
 import { drawPoseLandmarksAndConnections } from "../utils/drawUtils";
 
 const ExerciseTracking: React.FC = () => {
-  const exercise = "Jumping Jacks"; // Change this to the desired exercise name
+  const exercise = "Squats"; // Change this to the desired exercise name
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [detector, setDetector] = useState<posedetection.PoseDetector | null>(null);
@@ -88,6 +88,7 @@ const ExerciseTracking: React.FC = () => {
 
           // Get feedback and incorrect pairs based on keypoints
           const { feedback: newFeedback, incorrectPairs } = getWorkoutFeedback(
+            exercise,
             keypoints,
             count,
             setCount,
@@ -96,7 +97,7 @@ const ExerciseTracking: React.FC = () => {
           setFeedback(newFeedback);
 
           // Draw pose landmarks and connections with color correction for incorrect posture
-          drawPoseLandmarksAndConnections(keypoints, ctx, incorrectPairs);
+          drawPoseLandmarksAndConnections(keypoints, ctx, incorrectPairs, exercise);
         }
         requestAnimationFrame(detect);
       };

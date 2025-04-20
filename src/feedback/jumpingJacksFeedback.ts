@@ -2,7 +2,7 @@ import { Keypoint } from "@tensorflow-models/pose-detection";
 import { getAngle } from "../utils/getAngle";
 
 // Main feedback logic for Jumping Jacks exercise
-export const getWorkoutFeedback = (
+export const getJumpingJacksFeedback = (
   keypoints: Keypoint[],
   countRef: React.RefObject<number>,
   setCountRef: React.RefObject<boolean>,
@@ -114,5 +114,3 @@ export const getWorkoutFeedback = (
     incorrectPairs, // Return the list of incorrect body parts for drawing feedback
   };
 };
-
-// Note: The Incorrect Pairs can be further refined!
